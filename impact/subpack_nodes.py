@@ -3,6 +3,7 @@ import folder_paths
 import impact.core as core
 import impact.subcore as subcore
 from impact.utils import add_folder_path_and_extensions
+import execution_context
 
 version_code = 20
 
@@ -19,14 +20,15 @@ class UltralyticsDetectorProvider:
     def INPUT_TYPES(s):
         bboxs = ["bbox/"+x for x in folder_paths.get_filename_list("ultralytics_bbox")]
         segms = ["segm/"+x for x in folder_paths.get_filename_list("ultralytics_segm")]
-        return {"required": {"model_name": (bboxs + segms, )}}
+        return {"required": {"model_name": (bboxs + segms, )},
+                "hidden": {"context": "EXECUTION_CONTEXT"}}
     RETURN_TYPES = ("BBOX_DETECTOR", "SEGM_DETECTOR")
     FUNCTION = "doit"
 
     CATEGORY = "ImpactPack"
 
-    def doit(self, model_name):
-        model_path = folder_paths.get_full_path("ultralytics", model_name)
+    def doit(self, model_name, context: execution_context.ExecutionContext):
+        model_path = folder_paths.get_full_path(context, "ultralytics", model_name)
         model = subcore.load_yolo(model_path)
 
         if model_name.startswith("bbox"):
