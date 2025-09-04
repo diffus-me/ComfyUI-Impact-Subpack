@@ -27,7 +27,7 @@ WHITELIST_FILE_PATH = None
 
 try:
     # --- Attempting: Use ComfyUI's folder_paths (Preferred Method) ---
-    user_dir = folder_paths.get_user_directory()
+    user_dir = folder_paths.models_dir
     if user_dir and os.path.isdir(user_dir):
         WHITELIST_DIR = os.path.join(user_dir, "default", "ComfyUI-Impact-Subpack")
         WHITELIST_FILE_PATH = os.path.join(WHITELIST_DIR, "model-whitelist.txt")
@@ -310,7 +310,7 @@ def torch_wrapper(*args, **kwargs):
 
 # --- End: Replacement block for the torch_wrapper function ---
 
-torch.load = torch_wrapper
+# torch.load = torch_wrapper
 
 
 def load_yolo(model_path: str):

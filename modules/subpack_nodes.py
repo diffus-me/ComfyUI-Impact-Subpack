@@ -4,6 +4,8 @@ from . import subcore
 from . import utils
 import logging
 
+import execution_context
+
 
 def update_model_paths(model_path):
     utils.add_folder_path_and_extensions("ultralytics_bbox", [os.path.join(model_path, "ultralytics", "bbox")], folder_paths.supported_pt_extensions)
@@ -19,23 +21,26 @@ if 'download_model_base' in folder_paths.folder_names_and_paths:
 
 class UltralyticsDetectorProvider:
     @classmethod
-    def INPUT_TYPES(s):
-        bboxs = ["bbox/"+x for x in folder_paths.get_filename_list("ultralytics_bbox")]
-        segms = ["segm/"+x for x in folder_paths.get_filename_list("ultralytics_segm")]
-        return {"required": {"model_name": (bboxs + segms, )}}
+    def INPUT_TYPES(s, context: execution_context.ExecutionContext):
+        bboxs = ["bbox/"+x for x in folder_paths.get_filename_list(context, "ultralytics_bbox")]
+        segms = ["segm/"+x for x in folder_paths.get_filename_list(context, "ultralytics_segm")]
+        return {
+            "required": {"model_name": (bboxs + segms, )},
+            "hidden": {"context": "EXECUTION_CONTEXT"}
+        }
     RETURN_TYPES = ("BBOX_DETECTOR", "SEGM_DETECTOR")
     FUNCTION = "doit"
 
     CATEGORY = "ImpactPack"
 
-    def doit(self, model_name):
-        model_path = folder_paths.get_full_path("ultralytics", model_name)
+    def doit(self, model_name, context: execution_context.ExecutionContext):
+        model_path = folder_paths.get_full_path(context, "ultralytics", model_name)
 
         if model_path is None:
             if model_name.startswith('bbox/'):
-                model_path = folder_paths.get_full_path("ultralytics_bbox", model_name[5:])
+                model_path = folder_paths.get_full_path(context, "ultralytics_bbox", model_name[5:])
             elif model_name.startswith('segm/'):
-                model_path = folder_paths.get_full_path("ultralytics_segm", model_name[5:])
+                model_path = folder_paths.get_full_path(context, "ultralytics_segm", model_name[5:])
 
         if model_path is None:
             logging.error(f"[Impact Subpack] model file '{model_name}' is not found in one of the following directories:")
